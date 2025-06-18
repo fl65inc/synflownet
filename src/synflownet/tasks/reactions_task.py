@@ -331,16 +331,21 @@ def main(wandb_run_name, backoff=False):
         if len(logdirs) > 0:
             name = sorted(logdirs)[0]
             checkpoint_path = os.path.join(logroot, name, "model_state.pt")
-            wandb.init(project="synflownet", name=name, id=name, resume="must")
+            wandb.init(project="synflownet", entity="asindhanai-montai-therapeutics", name=name, id=name, resume="must")
             print(f"Found checkpoint at {checkpoint_path}")
 
     if name is None and checkpoint_path is None:
         now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         if wandb_run_name is not None:
             name = f"{wandb_run_name}_{now}"
-            wandb.init(project="synflownet", name=name, id=name)
+            # Only initialize wandb if not already initialized (e.g., by a sweep)
+            if wandb.run is None:
+                wandb.init(project="synflownet", entity="asindhanai-montai-therapeutics", name=name, id=name)
         else:
             name = f"debug_{now}"
+            # Only initialize wandb if not already initialized (e.g., by a sweep)
+            if wandb.run is None:
+                wandb.init(project="synflownet", entity="asindhanai-montai-therapeutics", name=name, id=name)
         print(f"No checkpoint found, starting a new run {name}")
 
     # trainer is loaded from checkpoint using StandardOnlineTrainer.load_from_checkpoint
@@ -348,7 +353,7 @@ def main(wandb_run_name, backoff=False):
         trial = ReactionTrainer.load_from_checkpoint(checkpoint_path)
     else:
         config = init_empty(Config())
-        config.reward = "seh_reaction"  # vina, seh_reaction, gsk, drd2, seh_qed
+        config.reward = "qed"  # vina, seh_reaction, gsk, drd2, seh_qed
         config.print_every = 1
         config.log_dir = f"./logs/debug_run_reactions_task_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
         config.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -374,8 +379,12 @@ def main(wandb_run_name, backoff=False):
             config = override_config(config, overrides)
 
         # Activate WandB here if not running experiment through a sweep
-        if hasattr(config, "wandb"):
+        # Only initialize if wandb is not already initialized (e.g., by a sweep)
+        if hasattr(config, "wandb") and wandb.run is None:
             wandb.init(project=config.wandb.project, entity=config.wandb.entity, config=config)
+        elif wandb.run is None:
+            # Fallback: initialize with default settings if no wandb config and not in a sweep
+            wandb.init(project="synflownet", entity="asindhanai-montai-therapeutics", config=config)
         config.algo.max_len = 3
         config.algo.tb.backward_policy = "MaxLikelihood"
         config.algo.tb.do_parameterize_p_b = True

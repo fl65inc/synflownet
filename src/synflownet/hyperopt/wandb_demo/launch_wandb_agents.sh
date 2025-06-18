@@ -17,3 +17,5 @@ echo "Using environment={$PYENV_VERSION}"
 
 # launch wandb agent
 wandb agent --count 1 --entity valencelabs --project gflownet $1
+
+# TODO: Not used this, instead ran 

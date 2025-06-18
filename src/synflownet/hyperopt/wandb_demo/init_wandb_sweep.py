@@ -9,10 +9,11 @@ from synflownet.config import Config, init_empty
 from synflownet.tasks.reactions_task import ReactionTrainer
 
 TIME = time.strftime("%m-%d-%H-%M")
-ENTITY = "valencelabs"
+ENTITY = "asindhanai-montai-therapeutics"  # Your full wandb entity name
 PROJECT = "synflownet"
-SWEEP_NAME = f"{TIME}-synflownet-open-reproduce-sehreactions"
-STORAGE_DIR = f"/mnt/ps/home/CORP/miruna.cretu/project/outgoing/wandb_sweeps/{SWEEP_NAME}"
+SWEEP_NAME = f"{TIME}-synflownet-open-reproduce-qed"
+# Use a local directory that actually exists
+STORAGE_DIR = f"./wandb_sweeps/{SWEEP_NAME}"
 
 
 # Define the search space of the sweep
@@ -62,21 +63,50 @@ def wandb_config_merger():
     config.cond.focus_region.focus_type = None
     config.replay.use = False
 
-    config.reward = "seh_reaction"
+    config.reward = "qed"
 
     # Merge the wandb sweep config with the nested config from synflownet
     config.seed = wandb_config["config.seed"]
+    
+    # Ensure the log directory exists
+    os.makedirs(config.log_dir, exist_ok=True)
+    
+    print(f"Config log_dir: {config.log_dir}")
+    print(f"Wandb run name: {wandb.run.name}")
+    print(f"Wandb run id: {wandb.run.id}")
 
     return config
 
 
 if __name__ == "__main__":
+    # Check if wandb is logged in
+    try:
+        api = wandb.Api()
+        if ENTITY is None:
+            # Get the current user's entity from wandb
+            ENTITY = api.default_entity
+        print(f"Using Wandb entity: {ENTITY}")
+    except Exception as e:
+        print(f"Error connecting to Wandb: {e}")
+        print("Please run 'wandb login' first to authenticate with Wandb")
+        sys.exit(1)
+    
     # if there no arguments, initialize the sweep, otherwise this is a wandb agent
     if len(sys.argv) == 1:
-        if os.path.exists(STORAGE_DIR):
-            raise ValueError(f"Sweep storage directory {STORAGE_DIR} already exists.")
-
-        wandb.sweep(sweep_config, entity=ENTITY, project=PROJECT)
+        # Create storage directory if it doesn't exist
+        os.makedirs(STORAGE_DIR, exist_ok=True)
+        
+        if os.path.exists(os.path.join(STORAGE_DIR, "sweep_id.txt")):
+            print(f"Sweep already exists in {STORAGE_DIR}")
+            with open(os.path.join(STORAGE_DIR, "sweep_id.txt"), "r") as f:
+                sweep_id = f.read().strip()
+            print(f"Existing sweep ID: {sweep_id}")
+        else:
+            sweep_id = wandb.sweep(sweep_config, entity=ENTITY, project=PROJECT)
+            print(f"Created new sweep with ID: {sweep_id}")
+            # Save sweep ID for future reference
+            with open(os.path.join(STORAGE_DIR, "sweep_id.txt"), "w") as f:
+                f.write(sweep_id)
 
     else:
         wandb.init(entity=ENTITY, project=PROJECT)
