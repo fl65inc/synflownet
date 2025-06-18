@@ -1,0 +1,84 @@
+_wandb:
+    value:
+        cli_version: 0.20.1
+        m: []
+        python_version: 3.10.14
+        t:
+            "1":
+                - 1
+                - 5
+                - 11
+                - 49
+                - 53
+                - 77
+            "2":
+                - 1
+                - 5
+                - 11
+                - 49
+                - 53
+                - 77
+            "3":
+                - 13
+                - 14
+                - 55
+                - 61
+            "4": 3.10.14
+            "5": 0.20.1
+            "6": 4.43.4
+            "12": 0.20.1
+            "13": linux-x86_64
+algo:
+    value: '{''method'': ''TB'', ''num_from_policy'': 64, ''num_from_dataset'': 0, ''num_from_buffer_for_pb'': 64, ''valid_num_from_policy'': 64, ''valid_num_from_dataset'': 0, ''max_len'': 3, ''max_nodes'': 9, ''max_edges'': 128, ''illegal_action_logreward'': -75.0, ''illegal_bck_traj_reward'': -1.0, ''bck_reward_exponent'': 1.0, ''synthesis_cost_as_bck_reward'': False, ''strict_forward_policy'': False, ''strict_bck_masking'': False, ''train_random_action_prob'': 0.0, ''train_det_after'': None, ''valid_random_action_prob'': 0.0, ''sampling_tau'': 0.99, ''tb'': {''bootstrap_own_reward'': False, ''epsilon'': None, ''reward_loss_multiplier'': 1.0, ''variant'': <TBVariant.TB: 0>, ''do_correct_idempotent'': False, ''do_parameterize_p_b'': True, ''do_predict_n'': False, ''do_sample_p_b'': False, ''do_length_normalize'': False, ''subtb_max_len'': 128, ''Z_learning_rate'': 0.001, ''Z_lr_decay'': 50000.0, ''cum_subtb'': True, ''loss_fn'': <LossFN.MSE: 0>, ''loss_fn_par'': 1.0, ''n_loss'': <NLoss.none: 0>, ''n_loss_multiplier'': 1.0, ''reinforce_loss_multiplier'': 1.0, ''bck_entropy_loss_multiplier'': 1.0, ''mle_loss_multiplier'': 1.0, ''backward_policy'': <Backward.MaxLikelihood: 7>}, ''moql'': {''gamma'': 1.0, ''num_omega_samples'': 32, ''num_objectives'': 2, ''lambda_decay'': 10000, ''penalty'': -10.0}, ''a2c'': {''entropy'': 0.01, ''gamma'': 1.0, ''penalty'': -10.0}, ''fm'': {''epsilon'': 1e-38, ''balanced_loss'': False, ''leaf_coef'': 10.0, ''correct_idempotent'': False}, ''sql'': {''alpha'': 0.01, ''gamma'': 1.0, ''penalty'': -10.0, ''do_q_prime_correction'': False, ''lagged_model_update_freq'': None, ''lagged_model_tau'': 1.0}}'
+checkpoint_every:
+    value: None
+cond:
+    value: '{''valid_sample_cond_info'': True, ''temperature'': {''sample_dist'': ''constant'', ''dist_params'': [32.0], ''num_thermometer_dim'': 32}, ''moo'': {''num_objectives'': 2, ''num_thermometer_dim'': 16}, ''weighted_prefs'': {''preference_type'': ''dirichlet'', ''preference_param'': 1.5}, ''focus_region'': {''focus_type'': ''centered'', ''use_steer_thermomether'': False, ''focus_cosim'': 0.98, ''focus_limit_coef'': 0.1, ''focus_model_training_limits'': [0.25, 0.75], ''focus_model_state_space_res'': 30, ''max_train_it'': 20000}}'
+desc:
+    value: noDesc
+device:
+    value: cuda
+git_hash:
+    value: None
+hostname:
+    value: ip-10-65-197-122
+log_dir:
+    value: ./logs/debug_run_reactions_task_2025-06-17_20-05-58
+model:
+    value: '{''num_layers'': 4, ''num_emb'': 128, ''dropout'': 0.0, ''graph_transformer'': {''num_heads'': 2, ''ln_type'': ''pre'', ''num_mlp_layers'': 0, ''concat_heads'': True, ''continuous_action_embs'': True, ''fingerprint_type'': ''morgan_1024'', ''fingerprint_path'': None}}'
+mp_buffer_size:
+    value: "536870912"
+num_final_gen_steps:
+    value: "100"
+num_training_steps:
+    value: "5000"
+num_validation_gen_steps:
+    value: "10"
+num_workers:
+    value: "0"
+opt:
+    value: '{''opt'': ''adam'', ''learning_rate'': 0.0001, ''lr_decay'': 2000.0, ''weight_decay'': 1e-08, ''momentum'': 0.9, ''clip_grad_type'': ''norm'', ''clip_grad_param'': 10.0, ''adam_eps'': 1e-08}'
+overwrite_existing_exp:
+    value: "True"
+pickle_mp_messages:
+    value: "False"
+print_every:
+    value: "1"
+replay:
+    value: '{''use'': False, ''capacity'': 10000, ''warmup'': 64, ''hindsight_ratio'': 0.0, ''num_from_replay'': 0, ''num_new_samples'': 64}'
+resume:
+    value: None
+reward:
+    value: qed
+seed:
+    value: "0"
+start_at_step:
+    value: "0"
+store_all_checkpoints:
+    value: "False"
+task:
+    value: '{''reactions_task'': {''templates_filename'': ''hb.txt'', ''reverse_templates_filename'': None, ''reward'': None, ''building_blocks_filename'': ''enamine_bbs.txt'', ''precomputed_bb_masks_filename'': ''precomputed_bb_masks_enamine_bbs.pkl'', ''building_blocks_costs'': None, ''sanitize_building_blocks'': False}}'
+validate_every:
+    value: "500"
+vina:
+    value: '{''opencl_binary_path'': ''bin/QuickVina2-GPU-2-1'', ''vina_path'': ''bin/QuickVina2-GPU-2-1/Vina-GPU'', ''target'': ''kras''}'

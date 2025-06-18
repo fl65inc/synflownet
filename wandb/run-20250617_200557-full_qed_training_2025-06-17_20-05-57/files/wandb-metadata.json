@@ -1,0 +1,45 @@
+{
+  "os": "Linux-5.19.0-1029-aws-x86_64-with-glibc2.35",
+  "python": "CPython 3.10.14",
+  "startedAt": "2025-06-17T20:05:57.461389Z",
+  "args": [
+    "--wandb_run_name",
+    "full_qed_training"
+  ],
+  "program": "-m synflownet.tasks.reactions_task",
+  "git": {
+    "remote": "https://github.com/mirunacrt/synflownet.git",
+    "commit": "574f1e148f42e0c79877318fa9d84d2552cf5025"
+  },
+  "email": "asindhanai@montai.com",
+  "root": "/home/ubuntu/synflownet",
+  "host": "ip-10-65-197-122",
+  "executable": "/home/ubuntu/conda/envs/sfn/bin/python3",
+  "cpu_count": 16,
+  "cpu_count_logical": 32,
+  "gpu": "Tesla T4",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "155897610240",
+      "used": "33568116736"
+    }
+  },
+  "memory": {
+    "total": "133519720448"
+  },
+  "cpu": {
+    "count": 16,
+    "countLogical": 32
+  },
+  "gpu_nvidia": [
+    {
+      "name": "Tesla T4",
+      "memoryTotal": "16106127360",
+      "cudaCores": 2560,
+      "architecture": "Turing",
+      "uuid": "GPU-20fe44a8-ccbb-425d-5b76-3ecf1c2fc632"
+    }
+  ],
+  "cudaVersion": "12.0"
+}
