@@ -105,7 +105,7 @@ class MoleculeSampler:
         # Prepare conditional information
         if conditional_info is None:
             # Use default conditioning from the task
-            cond_info = self.task.sample_conditional_information(num_samples, step=0)
+            cond_info = self.task.sample_conditional_information(num_samples, train_it=0)
             cond_encoding = cond_info["encoding"]
         else:
             # Custom conditioning (e.g., specific temperature, focus direction)
