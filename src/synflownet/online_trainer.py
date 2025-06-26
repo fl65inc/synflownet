@@ -139,7 +139,13 @@ class StandardOnlineTrainer(GFNTrainer):
 
     @classmethod
     def load_from_checkpoint(cls, checkpoint_path):
-        state = torch.load(checkpoint_path)
+        # Ensure the checkpoint file exists before attempting to load
+        if not os.path.exists(checkpoint_path):
+            raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
+        
+        # Load the checkpoint with explicit map_location to avoid memory mapping issues
+        # that can sometimes cause the original file to be deleted
+        state = torch.load(checkpoint_path, map_location='cpu')
         config = Config(**state["cfg"])
         trainer = cls(config)
         trainer.model.load_state_dict(state["models_state_dict"][0])

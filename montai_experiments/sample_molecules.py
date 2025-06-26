@@ -60,9 +60,18 @@ class MoleculeSampler:
     def _load_model(self):
         """Load the trained model and associated components"""
         print(f"Loading model from {self.checkpoint_path}")
+
         
         if not os.path.exists(self.checkpoint_path):
             raise FileNotFoundError(f"Checkpoint file not found: {self.checkpoint_path}")
+        
+        # Determine device to use
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Using device: {self.device}")
+        
+        # Set the worker device for sampling
+        from synflownet.utils.misc import set_main_process_device
+        set_main_process_device(self.device)
         
         # Load the trainer from checkpoint
         self.trainer = ReactionTrainer.load_from_checkpoint(self.checkpoint_path)
@@ -72,7 +81,9 @@ class MoleculeSampler:
         self.task = self.trainer.task
         self.ctx = self.trainer.ctx
         self.sampler = self.trainer.sampler
-        breakpoint()
+        
+        # Move model to the appropriate device
+        self.model.to(self.device)
         
         # Set to evaluation mode
         self.model.eval()
@@ -108,6 +119,9 @@ class MoleculeSampler:
             # Use default conditioning from the task
             cond_info = self.task.sample_conditional_information(num_samples, train_it=0)
             cond_encoding = cond_info["encoding"]
+            # Ensure conditioning is on the right device
+            if hasattr(cond_encoding, 'to'):
+                cond_encoding = cond_encoding.to(self.device)
         else:
             # Custom conditioning (e.g., specific temperature, focus direction)
             cond_encoding = self._prepare_custom_conditioning(num_samples, conditional_info)
@@ -151,8 +165,8 @@ class MoleculeSampler:
         Returns:
             Conditioning tensor
         """
-        # This is a simplified version - you might need to adapt based on your specific task
-        device = next(self.model.parameters()).device
+        # Use the device from the instance
+        device = self.device
         
         if 'temperature' in conditional_info:
             # Temperature conditioning
@@ -204,8 +218,8 @@ class MoleculeSampler:
                 'is_valid': trajectory.get('is_valid', True),
                 'trajectory_length': len(trajectory.get('traj', [])),
                 'reward': reward,
-                'forward_logprob': trajectory.get('fwd_logprob', torch.tensor(0.0)).item(),
-                'backward_logprob': trajectory.get('bck_logprob', torch.tensor(0.0)).item(),
+                'forward_logprob': self._safe_tensor_to_float(trajectory.get('fwd_logprob', 0.0)),
+                'backward_logprob': self._safe_tensor_to_float(trajectory.get('bck_logprob', 0.0)),
                 **properties
             }
             
@@ -214,6 +228,15 @@ class MoleculeSampler:
         except Exception as e:
             print(f"Error processing trajectory {idx}: {e}")
             return None
+    
+    def _safe_tensor_to_float(self, value) -> float:
+        """Safely convert a value to float, handling both tensors and regular numbers"""
+        if hasattr(value, 'item'):
+            return value.item()
+        elif isinstance(value, (int, float)):
+            return float(value)
+        else:
+            return 0.0
     
     def _calculate_properties(self, mol: Chem.Mol) -> Dict[str, float]:
         """Calculate molecular properties"""
@@ -236,13 +259,14 @@ class MoleculeSampler:
     def _calculate_reward(self, mol: Chem.Mol) -> Optional[float]:
         """Calculate reward using the task's reward function"""
         try:
-            # Convert to graph for reward calculation
-            graph = self.ctx.obj_to_graph(mol)
+            # Calculate reward with required traj_lens argument
+            # For single molecules, trajectory length is 1
+            traj_lens = torch.tensor([1])
+            obj_props, is_valid = self.task.compute_obj_properties([mol], traj_lens)
             
-            # Calculate reward
-            reward = self.task.compute_obj_properties([graph])
-            if len(reward) > 0:
-                return reward[0].item()
+            if is_valid.any() and obj_props.numel() > 0:
+                # obj_props is a tensor, not an object with .objectives
+                return obj_props[0].item()
             return None
         except Exception as e:
             print(f"Error calculating reward: {e}")
@@ -325,7 +349,8 @@ class MoleculeSampler:
             mols = [mol for mol in mols if mol is not None]
             
             if len(mols) > 1:
-                diversity_score = calculate_molecular_diversity(mols)
+                # calculate_molecular_diversity returns (mean_diversity, diversity_array)
+                diversity_score, _ = calculate_molecular_diversity(mols)
             else:
                 diversity_score = 0.0
         except Exception as e:
@@ -411,6 +436,7 @@ def main():
         diversity_stats = sampler.analyze_diversity(molecules)
         print(f"\nDiversity Analysis:")
         for key, value in diversity_stats.items():
+            # All values from analyze_diversity should now be floats
             print(f"{key}: {value:.3f}")
         
         # Save results
