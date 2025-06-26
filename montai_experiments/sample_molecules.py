@@ -72,6 +72,7 @@ class MoleculeSampler:
         self.task = self.trainer.task
         self.ctx = self.trainer.ctx
         self.sampler = self.trainer.sampler
+        breakpoint()
         
         # Set to evaluation mode
         self.model.eval()

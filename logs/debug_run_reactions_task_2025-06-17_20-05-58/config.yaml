@@ -15,7 +15,7 @@ num_workers: 0
 hostname: ip-10-65-197-122
 pickle_mp_messages: false
 mp_buffer_size: 536870912
-git_hash: 574f1e1
+git_hash: a096c25
 overwrite_existing_exp: true
 algo:
   method: TB
